@@ -1,29 +1,35 @@
 
-library("plyr")
+
+
+#################
+# Load packages #
+#################
+
+library("tidyr")
+library("dplyr")
 library("RColorBrewer")
-library("raster")
-library("rgeos")
-library("reshape2")
-library("maptools")
 library("ggplot2")
-library("grid")
 library("classInt")
 library("scales")
 library("Cairo")
-library("xlsx")
-library("codyn")
 
-install.packages("ggalt")
-
-
+# library("codyn")
+# install.packages("ggalt")
 # require("gtools")
 # library("soiltexture")
 # library("plotrix")
 # library("igraph")
 # library("Hmisc")
 
-setwd("C:/Users/Robbi/Dropbox/Shared/Robbi-Keith")
-setwd("D:/Dropbox/Shared/Robbi-Keith")
+# Pseudo R2
+source("http://rcompanion.org/r_script/nagelkerke.r")
+
+
+###############
+# Working dir #
+###############
+
+setwd("D:/Dropbox/Other/cameratrap/data")
 
 theme_custom = theme( plot.background = element_blank(),
                       panel.background = element_blank(),
@@ -40,30 +46,20 @@ theme_custom = theme( plot.background = element_blank(),
                       strip.text.x = element_text(size = 13, face = "bold"),
                       strip.text.y = element_text(size = 13, face = "italic", angle = 90))
 
-# Pseudo R2
-source("http://rcompanion.org/r_script/nagelkerke.r")
+
+################
+# Prepare data #
+################
+
+# Import data
+camera_data_raw = read.csv("cameratrapdata_14Oct15.csv")
+
+camera_data_clean = camera_data_raw %>%
+                    select(-X2012.Date.month:-X2014.Date.month) %>%
+                    filter(is.finite(Activity..number.of.hits.)) 
 
 
 
-
-camera_data_raw = read.xlsx("Scouting-camera data- Site1-KeithBishop.xlsx", "Sheet1")
-# rain_data = read.xlsx("rain-monthly-plot.xlsx", 16)
-# maxtemp_data = read.xlsx("rain-monthly-plot.xlsx", 17)
-
-# extemp_data = maxtemp_data[maxtemp_data$value > 28 & !is.na(maxtemp_data$value) ,]
-# extemp_data$value = 1
-
-
-# camera_data = ddply(camera_data, "Middle.Date", summarise, Predators = Dingo + Cat + Fox,
-#                                                            Mammals = Long.nosed.bandicoot + Brush.tailed.possum + Paddymelon + KOALA,
-#                                                            Birds =  Brush.turkey + Noisy.pitta + Lyre.bird + Yellow.throated.srubwren)
-
-
-##############
-# Categories #
-##############
-
-colnames(camera_data_raw)
 
 camera_data = ddply(camera_data_raw, "Middle.Date", summarise, 
                     Apex_predator = Dingo,
@@ -71,7 +67,7 @@ camera_data = ddply(camera_data_raw, "Middle.Date", summarise,
                     Large_mammals = Echidna + Brush.tailed.possum + Paddymelon + KOALA + Ring.tailed.possum + Swamp.wallaby,
                     Small_mammals = short.white.tailed.mouse + Small.bat + Long.nosed.bandicoot + Anechinus + Hopping.mouse + Rat.with.long.whitish.rigid.tail,
                     Birds =  Rufous.fantail + Catbird + Lewins.honeyeater + Whites.thrush + Brush.turkey + Noisy.pitta + Lyre.bird + Yellow.throated.srubwren + Wonga.pigeon + Whipbird + Grey.shrike.thrush + Red.browed.firetail + Magpie + yellow.robin + Emerald.dove,
-#                     Invertebrates = Moth + leech + Crayfish... + Spider,
+                    Invertebrates = Moth + leech + Crayfish... + Spider,
                     Reptiles = Forest.dragon + Land.mullet + Python + Goanna)
 
 camera_data = camera_data[complete.cases(camera_data),]
