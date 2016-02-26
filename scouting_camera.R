@@ -1,6 +1,4 @@
 
-
-
 #################
 # Load packages #
 #################
@@ -99,6 +97,8 @@ ggplot() +
   scale_x_date(expand=c(0.0, 0.0)) + 
   scale_y_continuous(expand=c(0.0, 0.0)) + xlab("Date") + ylab("")
 
+ggsave("results/output_categories.png")
+
 
 subset_data = filter(camera_data_clean, variable %in% c("Dingo", 
                                                         "Fox", 
@@ -106,8 +106,8 @@ subset_data = filter(camera_data_clean, variable %in% c("Dingo",
                                                         "Long.nosed.bandicoot",
                                                         "Brush.tailed.possum",
                                                         "Paddymelon",
+                                                        "Brush.turkey"))
                                                         # "KOALA",
-                                                        "Brush.turkey")
                                                         # "Noisy.pitta",
                                                         # "Lyre.bird"
                                                         # "Yellow.throated.srubwren")) 
@@ -121,6 +121,10 @@ ggplot() +
   guides(fill=FALSE) + 
   scale_x_date(expand=c(0.0, 0.0)) + 
   scale_y_continuous(expand=c(0.0, 0.0)) + xlab("Date") + ylab("")
+
+ggsave("results/output_species.png")
+
+
 
 
 #########
