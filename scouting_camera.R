@@ -10,6 +10,8 @@ library("ggplot2")
 library("classInt")
 library("scales")
 library("Cairo")
+library("png")
+library("RCurl")
 
 # library("codyn")
 # install.packages("ggalt")
@@ -28,6 +30,7 @@ source("http://rcompanion.org/r_script/nagelkerke.r")
 ###############
 
 setwd("D:/Dropbox/Other/cameratrap/")
+setwd("C:/Users/Robbi/Dropbox/Other/cameratrap/")
 
 theme_custom = theme( plot.background = element_blank(),
                       panel.background = element_blank(),
@@ -50,10 +53,11 @@ theme_custom = theme( plot.background = element_blank(),
 ################
 
 # Import data
-camera_data_raw = read.csv("data/cameratrapdata_14Oct15.csv")
+camera_data_raw = read.csv("data/cameratrapdata_26Feb16.csv")
+colnames(camera_data_raw)
 
 camera_data_clean = camera_data_raw %>%
-                    select(-X2012.Date.month:-X2014.Date.month) %>%
+                    select(-X2013.Date.month:-X2016.Date.month) %>%
                     filter(is.finite(Activity..number.of.hits.)) %>%
                     mutate(Middle.Date = as.Date(Middle.Date, format = "%d/%m/%Y"),
                            Apex_predator = Dingo, 
@@ -125,6 +129,21 @@ ggplot() +
 ggsave("results/output_species.png")
 
 
+subset_data = filter(camera_data_clean, variable %in% c("Apex_predator", 
+                                                        "Meso_predators", 
+                                                        "Small_mammals")) 
+
+ggplot() + 
+  # geom_rect(data=rect, aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax), color=NA, alpha=0.1, inherit.aes = FALSE) +
+  geom_histogram(data=subset_data, aes(y=..count.., weight = value, x=Middle.Date, fill=variable),binwidth=4, alpha=0.8, position="identity")+
+  geom_density(data=subset_data, aes(y=..count../4, weight = value, x=Middle.Date, fill=variable),alpha=.2, adjust=0.2) +
+  facet_grid(variable~.,scales = "free_y") + 
+  theme_custom + 
+  guides(fill=FALSE) + 
+  scale_x_date(expand=c(0.0, 0.0)) + 
+  scale_y_continuous(expand=c(0.0, 0.0)) + xlab("Date") + ylab("") 
+  
+ggsave("results/output_dingo.png")
 
 
 #########
