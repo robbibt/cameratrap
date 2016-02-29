@@ -7,7 +7,7 @@ Code for plotting output of camera trap footage for camera trap hidden in wet sc
 alt="Superb Lyrebird drops in on camera trap hidden in wet sclerophyll forest near Bungwahl on the NSW Mid North Coast" width="240" height="180" border="10" /></a>
 
 
-#### Most recent density plot, selected species
+#### Most recent density plot, top predator vs. mesopredators vs. small mammals
 ![Density plot, dingo](https://github.com/robbibt/cameratrap/blob/master/results/output_dingo.png "Density plot, top predator vs. mesopredators vs. small mammals")
 
 #### Most recent density plot, selected species
