@@ -143,7 +143,7 @@ ggplot() +
   scale_x_date(expand=c(0.0, 0.0)) + 
   scale_y_continuous(expand=c(0.0, 0.0)) + xlab("Date") + ylab("") 
   
-ggsave("results/output_dingo.png")
+ggsave("results/output_dingo.png", width = 8, height = 5.5)
 
 
 #########
