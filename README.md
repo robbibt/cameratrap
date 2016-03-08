@@ -15,5 +15,3 @@ alt="Superb Lyrebird drops in on camera trap hidden in wet sclerophyll forest ne
 
 #### Mist recent density plot, species categories
 ![Density plot, selected species](https://github.com/robbibt/cameratrap/blob/master/results/output_categories.png "Density plot, species categories")
-
-
