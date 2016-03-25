@@ -43,9 +43,9 @@ theme_custom = theme( plot.background = element_blank(),
                       legend.background = element_blank(),
                       legend.text.align = 0,
                       strip.background = element_blank(),
-                      axis.title = element_text(size = 13,  vjust = 0.2),
-                      strip.text.x = element_text(size = 13, face = "bold"),
-                      strip.text.y = element_text(size = 13, face = "italic", angle = 90))
+                      axis.title = element_text(size = 12,  vjust = 0.2),
+                      strip.text.x = element_text(size = 12, face = "bold"),
+                      strip.text.y = element_text(size = 12, face = "italic", angle = 90))
 
 
 ################
@@ -101,7 +101,7 @@ ggplot() +
   scale_x_date(expand=c(0.0, 0.0)) + 
   scale_y_continuous(expand=c(0.0, 0.0)) + xlab("Date") + ylab("")
 
-ggsave("results/output_categories.png")
+ggsave("results/output_categories.png", width = 7, height = 9)
 
 
 subset_data = filter(camera_data_clean, variable %in% c("Dingo", 
@@ -126,7 +126,7 @@ ggplot() +
   scale_x_date(expand=c(0.0, 0.0)) + 
   scale_y_continuous(expand=c(0.0, 0.0)) + xlab("Date") + ylab("")
 
-ggsave("results/output_species.png")
+ggsave("results/output_species.png", width = 7, height = 9)
 
 
 subset_data = filter(camera_data_clean, variable %in% c("Apex_predator", 
@@ -134,7 +134,7 @@ subset_data = filter(camera_data_clean, variable %in% c("Apex_predator",
                                                         "Small_mammals")) 
 
 ggplot() + 
-  # geom_rect(data=rect, aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax), color=NA, alpha=0.1, inherit.aes = FALSE) +
+  geom_rect(data=rect, aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax), color=NA, alpha=0.1, inherit.aes = FALSE) +
   geom_histogram(data=subset_data, aes(y=..count.., weight = value, x=Middle.Date, fill=variable),binwidth=4, alpha=0.8, position="identity")+
   geom_density(data=subset_data, aes(y=..count../4, weight = value, x=Middle.Date, fill=variable),alpha=.2, adjust=0.2) +
   facet_grid(variable~.,scales = "free_y") + 
@@ -143,7 +143,7 @@ ggplot() +
   scale_x_date(expand=c(0.0, 0.0)) + 
   scale_y_continuous(expand=c(0.0, 0.0)) + xlab("Date") + ylab("") 
   
-ggsave("results/output_dingo.png", width = 8, height = 5.5)
+ggsave("results/output_dingo.png", width = 7, height = 5)
 
 
 #########
