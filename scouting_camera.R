@@ -120,7 +120,7 @@ ggplot() +
   geom_rect(data=rect, aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax), color=NA, alpha=0.1, inherit.aes = FALSE) +
   geom_histogram(data=subset_data, aes(y=..count.., weight = value, x=Middle.Date, fill=variable),binwidth=4, alpha=0.8, position="identity")+
   geom_density(data=subset_data, aes(y=..count../4, weight = value, x=Middle.Date, fill=variable),alpha=.2, adjust=0.2) +
-  facet_wrap(~variable,ncol=1, scales = "free_y") + 
+  facet_wrap(~variable, ncol=1, scales = "free_y") + 
   theme_custom + 
   guides(fill=FALSE) + 
   scale_x_date(expand=c(0.0, 0.0)) + 
@@ -137,7 +137,7 @@ ggplot() +
   geom_rect(data=rect, aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax), color=NA, alpha=0.1, inherit.aes = FALSE) +
   geom_histogram(data=subset_data, aes(y=..count.., weight = value, x=Middle.Date, fill=variable),binwidth=4, alpha=0.8, position="identity")+
   geom_density(data=subset_data, aes(y=..count../4, weight = value, x=Middle.Date, fill=variable),alpha=.2, adjust=0.2) +
-  facet_grid(variable~.,scales = "free_y") + 
+  facet_wrap(~variable, ncol=1, scales = "free_y") + 
   theme_custom + 
   guides(fill=FALSE) + 
   scale_x_date(expand=c(0.0, 0.0)) + 
