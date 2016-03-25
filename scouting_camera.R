@@ -53,7 +53,7 @@ theme_custom = theme( plot.background = element_blank(),
 ################
 
 # Import data
-camera_data_raw = read.csv("data/cameratrapdata_26Feb16.csv")
+camera_data_raw = read.csv("data/cameratrapdata_22Mar16.csv")
 colnames(camera_data_raw)
 
 camera_data_clean = camera_data_raw %>%
@@ -61,10 +61,10 @@ camera_data_clean = camera_data_raw %>%
                     filter(is.finite(Activity..number.of.hits.)) %>%
                     mutate(Middle.Date = as.Date(Middle.Date, format = "%d/%m/%Y"),
                            Apex_predator = Dingo, 
-                           Meso_predators = Cat + Fox + Goanna,
+                           Meso_predators = Cat + Fox + Goanna + Collared.sparrowhawk,
                            Large_mammals = Echidna + Brush.tailed.possum + Paddymelon + KOALA + Ring.tailed.possum + Swamp.wallaby,
                            Small_mammals = short.white.tailed.mouse + Small.bat + Long.nosed.bandicoot + Anechinus + Hopping.mouse + Rat.with.long.whitish.rigid.tail,
-                           Birds = Rufous.fantail + Catbird + Lewins.honeyeater + Whites.thrush + Brush.turkey + Noisy.pitta + Lyre.bird + Yellow.throated.srubwren + Wonga.pigeon + Whipbird + Grey.shrike.thrush + Red.browed.firetail + Magpie + yellow.robin + Emerald.dove,
+                           Birds = Rufous.fantail + Catbird + Lewins.honeyeater + Whites.thrush + Brush.turkey + Noisy.pitta + Lyre.bird + Yellow.throated.srubwren + Wonga.pigeon + Whipbird + Grey.shrike.thrush + Red.browed.firetail + Magpie + yellow.robin + Emerald.dove + Collared.sparrowhawk,
                            Invertebrates = Moth + leech + Crayfish... + Spider,
                            Reptiles = Forest.dragon + Land.mullet + Python + Goanna) %>%
                     gather(variable, value, -Middle.Date:-Cumulative.number.of.taxa)
