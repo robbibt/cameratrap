@@ -67,8 +67,8 @@ camera_data_clean = camera_data_raw %>%
                            Small_mammals = `short white-tailed mouse` + `Small bat` + `Long-nosed bandicoot` + Anechinus + `Hopping mouse` + `Rat with long whitish rigid tail`,
                            Birds = `Rufous fantail` + Catbird + `Lewins honeyeater` + `Whites thrush` + `Brush turkey` + `Noisy pitta` + `Lyre bird` + `Yellow-throated srubwren` + `Wonga pigeon` + Whipbird + `Grey shrike thrush` + `Red-browed firetail` + Magpie + `yellow robin` + `Emerald dove` + `Collared sparrowhawk`,
                            Invertebrates = Moth + leech + `Crayfish(?)` + Spider,
-                           Reptiles = `Forest dragon` + `Land mullet` + Python + Goanna) %>%
-                    gather(variable, value, -`Middle Date`:-`Cumulative number of taxa`)
+                           Reptiles = `Forest dragon` + `Land mullet` + Python + Goanna) 
+
 
 # Seasonal rects for plotting timeseries
 rect <- data.frame (xmin="2012-06-01", xmax="2012-08-31", ymin=-Inf, ymax=Inf)
@@ -82,69 +82,83 @@ rect[[2]] = as.Date(rect[[2]])
 
 
 ###################
-# Subset and plot #
+# Over time plots #
 ###################
 
-subset_data = filter(camera_data_clean, variable %in% c("Apex_predator", 
-                                                        "Meso_predators", 
-                                                        "Large_mammals", 
-                                                        "Small_mammals", 
-                                                        "Birds", 
-                                                        "Reptiles")) 
-
-ggplot() + 
-  geom_rect(data=rect, aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax), color=NA, alpha=0.1, inherit.aes = FALSE) +
-  geom_histogram(data=subset_data, aes(y=..count.., weight = value, x=`Middle Date`, fill=variable), binwidth=4, alpha=0.8, position="identity") +
-  geom_density(data=subset_data, aes(y=..count../4, weight = value, x=`Middle Date`, fill=variable), alpha=.2, adjust=0.2) +
-  facet_wrap(~variable,ncol=1, scales = "free_y") + 
-  theme_custom + 
-  guides(fill=FALSE) + 
-  scale_x_date(expand=c(0.0, 0.0)) + 
-  scale_y_continuous(expand=c(0.0, 0.0)) + xlab("Date") + ylab("")
+camera_data_clean %>%
+    select(`Middle Date`, Apex_predator:Birds, Reptiles) %>% 
+    gather(variable, value, -`Middle Date`) %>% 
+    ggplot() + 
+        geom_histogram(aes(y=..count.., weight = value, x=`Middle Date`, fill=variable), binwidth=4, alpha=0.8, position="identity") +
+        geom_density(aes(y=..count../4, weight = value, x=`Middle Date`, fill=variable), alpha=.2, adjust=0.2) +
+        facet_wrap(~variable,ncol=1, scales = "free_y") + 
+        theme_custom + 
+        guides(fill=FALSE) + 
+        scale_x_date(expand=c(0.0, 0.0)) + 
+        scale_y_continuous(expand=c(0.0, 0.0)) + xlab("Date") + ylab("")
 
 ggsave("results/output_categories.png", width = 7, height = 9)
 
 
-subset_data = filter(camera_data_clean, variable %in% c("Dingo", 
-                                                        "Fox", 
-                                                        "Cat", 
-                                                        "Long-nosed bandicoot",
-                                                        "Brush-tailed possum",
-                                                        "Paddymelon",
-                                                        "Brush turkey"))
-                                                        # "KOALA",
-                                                        # "Noisy.pitta",
-                                                        # "Lyre.bird"
-                                                        # "Yellow.throated.srubwren")) 
-
-ggplot() + 
-  geom_rect(data=rect, aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax), color=NA, alpha=0.1, inherit.aes = FALSE) +
-  geom_histogram(data=subset_data, aes(y=..count.., weight = value, x=`Middle Date`, fill=variable), binwidth=4, alpha=0.8, position="identity") +
-  geom_density(data=subset_data, aes(y=..count../4, weight = value, x=`Middle Date`, fill=variable), alpha=.2, adjust=0.2) +
-  facet_wrap(~variable, ncol=1, scales = "free_y") + 
-  theme_custom + 
-  guides(fill=FALSE) + 
-  scale_x_date(expand=c(0.0, 0.0)) + 
-  scale_y_continuous(expand=c(0.0, 0.0)) + xlab("Date") + ylab("")
+camera_data_clean %>%
+    select(`Middle Date`, Dingo, Fox, Cat, `Long-nosed bandicoot`, `Brush-tailed possum`, Paddymelon, `Brush turkey`) %>% 
+    gather(variable, value, -`Middle Date`) %>% 
+    ggplot() + 
+        geom_histogram(aes(y=..count.., weight = value, x=`Middle Date`, fill=variable), binwidth=4, alpha=0.8, position="identity") +
+        geom_density(aes(y=..count../4, weight = value, x=`Middle Date`, fill=variable), alpha=.2, adjust=0.2) +
+        facet_wrap(~variable, ncol=1, scales = "free_y") + 
+        theme_custom + 
+        guides(fill=FALSE) + 
+        scale_x_date(expand=c(0.0, 0.0)) + 
+        scale_y_continuous(expand=c(0.0, 0.0)) + xlab("Date") + ylab("") 
 
 ggsave("results/output_species.png", width = 7, height = 9)
 
 
-subset_data = filter(camera_data_clean, variable %in% c("Apex_predator", 
-                                                        "Meso_predators", 
-                                                        "Small_mammals")) 
-
-ggplot() + 
-  geom_rect(data=rect, aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax), color=NA, alpha=0.1, inherit.aes = FALSE) +
-  geom_histogram(data=subset_data, aes(y=..count.., weight = value, x=`Middle Date`, fill=variable), binwidth=4, alpha=0.8, position="identity") +
-  geom_density(data=subset_data, aes(y=..count../4, weight = value, x=`Middle Date`, fill=variable), alpha=.2, adjust=0.2) +
-  facet_wrap(~variable, ncol=1, scales = "free_y") + 
-  theme_custom + 
-  guides(fill=FALSE) + 
-  scale_x_date(expand=c(0.0, 0.0)) + 
-  scale_y_continuous(expand=c(0.0, 0.0)) + xlab("Date") + ylab("") 
+camera_data_clean %>%
+    select(`Middle Date`, Apex_predator:Meso_predators, Small_mammals) %>% 
+    gather(variable, value, -`Middle Date`) %>% 
+    ggplot() + 
+        geom_histogram(aes(y=..count.., weight = value, x=`Middle Date`, fill=variable), binwidth=4, alpha=0.8, position="identity") +
+        geom_density(aes(y=..count../4, weight = value, x=`Middle Date`, fill=variable), alpha=.2, adjust=0.2) +
+        facet_wrap(~variable, ncol=1, scales = "free_y") + 
+        theme_custom + 
+        guides(fill=FALSE) + 
+        scale_x_date(expand=c(0.0, 0.0)) + 
+        scale_y_continuous(expand=c(0.0, 0.0)) + xlab("Date") + ylab("") 
   
 ggsave("results/output_dingo.png", width = 7, height = 5)
+
+
+#############
+# X-Y plots #
+#############
+
+camera_data_clean %>%
+  select(`Middle Date`, Apex_predator:Meso_predators) %>% 
+  filter(Apex_predator+Meso_predators!=0) %>%
+  # gather(variable, value, -`Middle Date`) %>% 
+  ggplot(aes(x=Apex_predator, y=Meso_predators)) + 
+      geom_point(position = "jitter",) +
+      stat_smooth(method = "glm", method.args = list(family = "poisson")) +
+      theme_custom + 
+      guides(fill=FALSE) + 
+      scale_x_continuous(expand=c(0.0, 0.0)) + 
+      scale_y_continuous(expand=c(0.0, 0.0)) + xlab("Date") + ylab("") 
+
+camera_data_clean %>%
+  select(`Middle Date`, Meso_predators:Small_mammals) %>% 
+  filter(Meso_predators+Small_mammals!=0) %>%
+  # gather(variable, value, -`Middle Date`) %>% 
+  ggplot(aes(x=Small_mammals, y=Meso_predators)) + 
+      geom_point(position = "jitter",) +
+      stat_smooth(method = "glm", method.args = list(family = "poisson")) +
+      theme_custom + 
+      guides(fill=FALSE) + 
+      scale_x_continuous(expand=c(0.0, 0.0)) + 
+      scale_y_continuous(expand=c(0.0, 0.0)) + xlab("Date") + ylab("") 
+
+
 
 
 #########
