@@ -3,34 +3,17 @@
 # Load packages #
 #################
 
-library("readr")
-library("tidyr")
-library("dplyr")
 library("RColorBrewer")
 library("ggplot2")
-library("classInt")
-library("scales")
 library("Cairo")
-library("png")
-library("RCurl")
-
-# library("codyn")
-# install.packages("ggalt")
-# require("gtools")
-# library("soiltexture")
-# library("plotrix")
-# library("igraph")
-# library("Hmisc")
-
-# Pseudo R2
-source("http://rcompanion.org/r_script/nagelkerke.r")
+library("cowplot")
+library("tidyverse")
 
 
 ###############
 # Working dir #
 ###############
 
-setwd("D:/Dropbox/Other/cameratrap/")
 setwd("C:/Users/Robbi/Dropbox/Other/cameratrap/")
 
 theme_custom = theme( plot.background = element_blank(),
@@ -39,14 +22,17 @@ theme_custom = theme( plot.background = element_blank(),
                       panel.grid.minor = element_blank(),   
                       panel.border = element_blank(),
                       axis.line = element_line(color = 'black'),
-                      panel.margin = unit(0.2, "cm"),
+                      panel.spacing = unit(0.2, "cm"),
                       legend.key = element_blank(),
                       legend.background = element_blank(),
                       legend.text.align = 0,
                       strip.background = element_blank(),
                       axis.title = element_text(size = 12,  vjust = 0.2),
-                      strip.text.x = element_text(size = 12, face = "bold"),
+                      strip.text.x = element_text(size = 12, face = "bold", hjust = 0),
                       strip.text.y = element_text(size = 12, face = "italic", angle = 90))
+
+
+getwd()
 
 
 ################
@@ -54,179 +40,195 @@ theme_custom = theme( plot.background = element_blank(),
 ################
 
 # Import data
-camera_data_raw = read_csv("data/cameratrapdata_22Mar16.csv")
+camera_data_raw = read_csv("data/cameratrapdata_18Nov2024.csv")
 colnames(camera_data_raw)
 
 camera_data_clean = camera_data_raw %>%
-                    select(-`2013 Date month`:-`2016 Date month`) %>% 
-                    filter(is.finite(`Activity (number of hits)`)) %>%
-                    mutate(`Middle Date` = as.Date(`Middle Date`, format = "%d/%m/%Y"),
-                           Apex_predator = Dingo, 
-                           Meso_predators = Cat + Fox + Goanna + `Collared sparrowhawk`,
-                           Large_mammals = Echidna + `Brush-tailed possum` + Paddymelon + KOALA + `Ring-tailed possum` + `Swamp wallaby`,
-                           Small_mammals = `short white-tailed mouse` + `Small bat` + `Long-nosed bandicoot` + Anechinus + `Hopping mouse` + `Rat with long whitish rigid tail`,
-                           Birds = `Rufous fantail` + Catbird + `Lewins honeyeater` + `Whites thrush` + `Brush turkey` + `Noisy pitta` + `Lyre bird` + `Yellow-throated srubwren` + `Wonga pigeon` + Whipbird + `Grey shrike thrush` + `Red-browed firetail` + Magpie + `yellow robin` + `Emerald dove` + `Collared sparrowhawk`,
-                           Invertebrates = Moth + leech + `Crayfish(?)` + Spider,
-                           Reptiles = `Forest dragon` + `Land mullet` + Python + Goanna) 
-
-
-# Seasonal rects for plotting timeseries
-rect <- data.frame (xmin="2012-06-01", xmax="2012-08-31", ymin=-Inf, ymax=Inf)
-rect2 <- data.frame (xmin="2013-06-01", xmax="2013-08-31", ymin=-Inf, ymax=Inf)
-rect3 <- data.frame (xmin="2014-06-01", xmax="2014-08-31", ymin=-Inf, ymax=Inf)
-rect4 <- data.frame (xmin="2015-06-01", xmax="2015-08-31", ymin=-Inf, ymax=Inf)
-
-rect = rbind(rect, rect2, rect3, rect4)
-rect[[1]] = as.Date(rect[[1]])
-rect[[2]] = as.Date(rect[[2]])
-
-
-###################
-# Over time plots #
-###################
-
-camera_data_clean %>%
-    select(`Middle Date`, Apex_predator:Birds, Reptiles) %>% 
-    gather(variable, value, -`Middle Date`) %>% 
-    ggplot() + 
-        geom_histogram(aes(y=..count.., weight = value, x=`Middle Date`, fill=variable), binwidth=4, alpha=0.8, position="identity") +
-        geom_density(aes(y=..count../4, weight = value, x=`Middle Date`, fill=variable), alpha=.2, adjust=0.2) +
-        facet_wrap(~variable,ncol=1, scales = "free_y") + 
-        theme_custom + 
-        guides(fill=FALSE) + 
-        scale_x_date(expand=c(0.0, 0.0)) + 
-        scale_y_continuous(expand=c(0.0, 0.0)) + xlab("Date") + ylab("")
-
-ggsave("results/output_categories.png", width = 7, height = 9)
-
-
-camera_data_clean %>%
-    select(`Middle Date`, Dingo, Fox, Cat, `Long-nosed bandicoot`, `Brush-tailed possum`, Paddymelon, `Brush turkey`) %>% 
-    gather(variable, value, -`Middle Date`) %>% 
-    ggplot() + 
-        geom_histogram(aes(y=..count.., weight = value, x=`Middle Date`, fill=variable), binwidth=4, alpha=0.8, position="identity") +
-        geom_density(aes(y=..count../4, weight = value, x=`Middle Date`, fill=variable), alpha=.2, adjust=0.2) +
-        facet_wrap(~variable, ncol=1, scales = "free_y") + 
-        theme_custom + 
-        guides(fill=FALSE) + 
-        scale_x_date(expand=c(0.0, 0.0)) + 
-        scale_y_continuous(expand=c(0.0, 0.0)) + xlab("Date") + ylab("") 
-
-ggsave("results/output_species.png", width = 7, height = 9)
-
-
-camera_data_clean %>%
-    select(`Middle Date`, Apex_predator:Meso_predators, Small_mammals) %>% 
-    gather(variable, value, -`Middle Date`) %>% 
-    ggplot() + 
-        geom_histogram(aes(y=..count.., weight = value, x=`Middle Date`, fill=variable), binwidth=4, alpha=0.8, position="identity") +
-        geom_density(aes(y=..count../4, weight = value, x=`Middle Date`, fill=variable), alpha=.2, adjust=0.2) +
-        facet_wrap(~variable, ncol=1, scales = "free_y") + 
-        theme_custom + 
-        guides(fill=FALSE) + 
-        scale_x_date(expand=c(0.0, 0.0)) + 
-        scale_y_continuous(expand=c(0.0, 0.0)) + xlab("Date") + ylab("") 
   
-ggsave("results/output_dingo.png", width = 7, height = 5)
+  # Drop empty rows and unnecessary columns, and rename date column
+  filter(is.finite(`Activity (number of hits)`)) %>%
+  select(-`2013 Date month`:-`Cumulative number of taxa`,-`Dingo+Fox+Cat+Dog combined`,-`Rats/mice combined`,-`Fire`, -matches("^\\.\\.\\.")) %>%
+  rename(Date = `Middle Date`) %>%
+  
+  # Create additional summary columns for combinations of species
+  mutate(
+    Date = as.Date(Date, format = "%d/%m/%Y"),
+    `Apex predator` = Dingo + Dog,
+    `Ferals` = Cat + Fox + Dog,
+    `Possums` = `Brush-tailed possum` + `Ring-tailed possum`,
+    `Meso predators` = Cat + Fox + Goanna + `Collared sparrowhawk` + `Tiger quoll`,
+    `Large mammals` = Echidna + Koala,
+    `Small mammals` = `Short white-tailed mouse` + `Small bat` + `Long-nosed bandicoot` + 
+                      Anechinus + `Hopping mouse` + `Rat with long whitish rigid tail` + `Tiger quoll`,
+    `Birds` = `Rufous fantail` + Catbird + `Lewins honeyeater` + `Whites thrush` + `Brush turkey` + 
+              `Noisy pitta` + `Lyre bird` + `Yellow-throated srubwren` + `Wonga pigeon` + Whipbird + 
+              `Grey shrike thrush` + `Red-browed firetail` + Magpie + `Yellow robin` + `Emerald dove` + 
+              `Collared sparrowhawk` + `Torreian crow?` + `Bar-shouldered dove` + Logrunner + Kookaburra,
+    `Large birds` = `Brush turkey` + `Lyre bird`,
+    `Small birds` = `Rufous fantail` + Catbird + `Lewins honeyeater` + `Whites thrush` + `Noisy pitta` + 
+                    `Yellow-throated srubwren` + `Wonga pigeon` + Whipbird + `Grey shrike thrush` + 
+                    `Red-browed firetail` + Magpie + `Yellow robin` + `Emerald dove` + `Collared sparrowhawk` + 
+                    `Torreian crow?` + `Bar-shouldered dove` + Logrunner + Kookaburra,
+    `Invertebrates` = Moth + Leech + `Crayfish(?)` + Spider + Cicada + Tipulid + Grasshopper,
+    `Macropods` = `Swamp wallaby` + `Paddymelon` + `Potoroos??`,
+    `Reptiles` = `Forest dragon` + `Land mullet` + Python + Goanna + `Frog?` + `Black snake?`
+  ) %>%
+  
+  # Compute sum for all categories for each date
+  group_by(Date) %>%
+  summarise_all(sum) %>%
+  
+  # Convert to long format, and sort by mean count per species
+  gather(animal, count, -Date) %>%
+  mutate(animal = forcats::fct_reorder(
+    factor(animal),
+    count,
+    max,
+    na.rm = TRUE,
+    .desc = TRUE
+  )) %>% 
+  
+  # Add custom annotations
+  mutate(animal_text = recode(animal, 
+                       'Macropods' = "paste(bold('Macropods'), ' (e.g. Pademelons, Wallabies)')",
+                       'Possums' = "paste(bold('Possums'), ' (e.g. Brush-tailed, Ring-tailed)')",
+                       'Large birds' = "paste(bold('Large birds'), ' (e.g. Brush Turkeys, Lyrebirds)')",
+                       'Small birds' = "paste(bold('Small birds'), ' (e.g. Robins, scrubwrens, honeyeaters)')",
+                       'Small mammals' = "paste(bold('Small mammals'), ' (e.g. Bandicoots, Antechinus)')",
+                       'Dingo' = "bold('Dingo')",
+                       'Ferals' = "paste(bold('Ferals'), ' (e.g. Cats, foxes, dogs)')",
+                       'Reptiles' = "paste(bold('Reptiles'), ' (e.g. Goannas, snakes, lizards)')")) 
 
 
-#############
-# X-Y plots #
-#############
 
+# Create datafame of Winter seasons to add as underlay
+seasons = data.frame(
+  xmin = seq(as.Date('2012-06-01'), length.out = 13, by = "years"),
+  xmax = seq(as.Date('2012-08-31'), length.out = 13, by = "years"),
+  ymin = -Inf,
+  ymax = Inf
+)
+
+
+# Export all species
 camera_data_clean %>%
-  select(`Middle Date`, Apex_predator:Meso_predators) %>% 
-  filter(Apex_predator+Meso_predators!=0) %>%
-  # gather(variable, value, -`Middle Date`) %>% 
-  ggplot(aes(x=Apex_predator, y=Meso_predators)) + 
-      geom_point(position = "jitter",) +
-      stat_smooth(method = "glm", method.args = list(family = "poisson")) +
-      theme_custom + 
-      guides(fill=FALSE) + 
-      scale_x_continuous(expand=c(0.0, 0.0)) + 
-      scale_y_continuous(expand=c(0.0, 0.0)) + xlab("Date") + ylab("") 
+  
+  # Plot data
+  ggplot() + 
+  geom_rect(data=seasons, aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax), alpha = 0.08) +
+  geom_ribbon(aes(x = Date, ymin = 0, ymax = count, fill=animal), colour='#5e5e5e') +
+  geom_vline(aes(xintercept= as.Date('2019-12-24', format = "%Y-%m-%d")), linetype='dashed', linewidth=0.5, color='black') +
+  facet_wrap(~animal, ncol=1, scales = "free_y") +
+  theme_custom + 
+  guides(fill="none") +
+  # scale_fill_brewer(palette="Spectral") +
+  scale_x_date(expand=c(0.0, 0.0)) + 
+  scale_y_continuous(expand=c(0.0, 0.0)) + 
+  ylab("") 
 
+ggsave("results/output_species_all.jpg", width = 7, height = 49)
+
+
+########################################
+
+
+library('rphylopic')
+wallaby_img = pick_phylopic(uuid="940c14a5-1acc-4998-85a6-a4002e980fa8")
+possum_img = pick_phylopic(uuid="f5592cab-cc61-4aab-b1dd-fba7cd2df7c9")
+lyrebird_img = pick_phylopic(uuid="217b650d-edaa-4f21-ac5d-03908fd5eac4")
+turkey_img = pick_phylopic(uuid="828b7d15-d69f-4773-99c5-9eb571d8db19")
+robin_img = pick_phylopic(uuid="3c4ef873-76b5-473d-a740-8fcb4864462b")
+bandi_img = pick_phylopic(uuid="d9e97d9d-cbaa-42d1-93fd-6a787c1b4afc")
+antech_img = pick_phylopic(uuid="295cd9f7-eef2-441e-ba7e-40c772ca7611")
+dingo_img = pick_phylopic(uuid="3c534a59-fd0c-41bb-80c7-1d18db9bae13")
+fox_img = pick_phylopic(uuid="76352962-1eeb-4197-acdd-e3c7eeab839d")
+cat_img = pick_phylopic(uuid="23cd6aa4-9587-4a2e-8e26-de42885004c9")
+goanna_img = pick_phylopic(uuid="ce6a78bc-3ef1-4d60-ab40-113eb84c7802")
+snake_img = pick_phylopic(uuid="403858a0-6fd0-4db8-a38f-6f6d93a9bf74")
+
+# Export selected species and groups
+output_selected = camera_data_clean %>%
+  
+  # Select data to plot
+  dplyr::filter(animal %in% c('Dingo', 'Large birds', 'Small birds', 'Possums', 
+                              'Macropods', 'Small mammals', 'Ferals', 'Reptiles')) %>%
+
+  # Plot data
+  ggplot() + 
+  geom_rect(data=seasons, aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax), alpha = 0.08) +
+  geom_ribbon(aes(x = Date, ymin = 0, ymax = count, fill=animal_text), colour='#5e5e5e') +
+  geom_vline(aes(xintercept= as.Date('2019-12-24', format = "%Y-%m-%d")), linetype='dashed', size=0.3, color='black') +
+  # geom_label(y=100, x=as.Date('2019-12-24', format = "%Y-%m-%d"), label="Black\nSummer\nfire", size=5, position='nudge') +
+  facet_wrap(~animal_text, ncol=1, scales = "free_y", labeller=label_parsed) +
+  theme_custom + 
+  guides(fill="none") +
+  scale_fill_brewer(palette="Spectral") +
+  scale_x_date(expand=c(0.0, 0.0)) + 
+  scale_y_continuous(expand=c(0.0, 0.0)) + 
+  ylab("") +
+  annotate(geom = "text", x = as.Date('2012-07-10', format = "%Y-%m-%d"), y = 0, label = "Winter", size=3, color = "grey",
+           angle = 90, hjust=-1.15) 
+
+# Add annotations
+cowplot::plot_grid(output_selected) +
+  add_phylopic(img=wallaby_img, x = 0.935, y = 0.975, height = 0.055) +
+  add_phylopic(img=possum_img, x = 0.935, y = 0.86, height = 0.045) +
+  add_phylopic(img=turkey_img, x = 0.87, y = 0.74, height = 0.03) +
+  add_phylopic(img=lyrebird_img, x = 0.95, y = 0.742, height = 0.03) +
+  add_phylopic(img=robin_img, x = 0.965, y = 0.62, height = 0.025) +
+  add_phylopic(img=bandi_img, x = 0.89, y = 0.50, height = 0.022) +
+  add_phylopic(img=antech_img, x = 0.96, y = 0.497, height = 0.015) +
+  add_phylopic(img=dingo_img, x = 0.963, y = 0.383, height = 0.035) +
+  add_phylopic(img=cat_img, x = 0.89, y = 0.264, height = 0.026) +
+  add_phylopic(img=fox_img, x = 0.96, y = 0.264, height = 0.024) +
+  add_phylopic(img=goanna_img, x = 0.87, y = 0.143, height = 0.027) +
+  add_phylopic(img=snake_img, x = 0.95, y = 0.143, height = 0.019) +
+  cowplot::draw_text(c('🔥 Black Summer', 'Fire (24.12.2019)'), x = 0.69, y = c(0.982, 0.971), size=7)
+
+ggsave("results/output_species_selected.jpg", width = 7, height = 10)
+
+
+#################################################
+
+
+# Richness, activity etc
 camera_data_clean %>%
-  select(`Middle Date`, Meso_predators:Small_mammals) %>% 
-  filter(Meso_predators+Small_mammals!=0) %>%
-  # gather(variable, value, -`Middle Date`) %>% 
-  ggplot(aes(x=Small_mammals, y=Meso_predators)) + 
-      geom_point(position = "jitter",) +
-      stat_smooth(method = "glm", method.args = list(family = "poisson")) +
-      theme_custom + 
-      guides(fill=FALSE) + 
-      scale_x_continuous(expand=c(0.0, 0.0)) + 
-      scale_y_continuous(expand=c(0.0, 0.0)) + xlab("Date") + ylab("") 
+  
+  filter(count > 0,!(
+    animal %in% c(
+      'Apex predator',
+      'Ferals',
+      'Meso predators',
+      'Large mammals',
+      'Small mammals',
+      'Birds',
+      'Large birds',
+      'Small birds',
+      'Invertebrates',
+      'Reptiles'
+    )
+  )) %>%
+  # group_by(Date) %>%
+  
+  mutate(Date = lubridate::floor_date(Date, "month")) %>%
+  group_by(Date) %>%
+  
+  summarise(species_n = n_distinct(animal),
+            activity = sum(count)) %>% 
+  gather(variable, value, -Date) %>% 
+  
+  # Plot data
+  ggplot() + 
+  geom_rect(data=seasons, aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax), alpha = 0.08) +
+  geom_ribbon(aes(x =Date, ymin = 0, ymax = value, fill=variable), colour='#5e5e5e') +
+  geom_vline(aes(xintercept= as.Date('2019-12-24', format = "%Y-%m-%d")), linetype='dashed', size=0.5, color='black') +
+  # geom_label(y=100, x=as.Date('2019-12-24', format = "%Y-%m-%d"), label="Black\nSummer\nfire", size=5, position='nudge') +
+  facet_wrap(~variable, ncol=1, scales = "free_y") +
+  theme_custom + 
+  guides(fill="none") +
+  scale_fill_brewer(palette="Spectral") +
+  scale_x_date(expand=c(0.0, 0.0)) + 
+  scale_y_continuous(expand=c(0.0, 0.0)) + 
+  ylab("") 
 
-
-
-
-#########
-# Other #
-#########
-
-# # Small mammals, meso preds
-# data_smallmam_meso = camera_data[camera_data$Small_mammals > 0 | camera_data$Meso_predators > 0,]
-# smallmam_meso = glm(Small_mammals~Meso_predators, family="poisson", data=data_smallmam_meso); summary(smallmam_meso)
-# data_smallmam_meso2 <- aggregate(data_smallmam_meso$Meso_predators,by=list(x=data_smallmam_meso$Meso_predators,y=data_smallmam_meso$Small_mammals),length)
-# names(data_smallmam_meso2)[3] <- "count"
-# 
-# smallmam_meso_r2 = nagelkerke(smallmam_meso)$Pseudo.R.squared.for.model.vs.null[3]
-# ggplot(data=data_smallmam_meso2, aes(x=x, y=y)) +
-#   geom_point(aes(size=count)) + stat_smooth(method = "glm", se = FALSE, family="poisson", colour = "red") + 
-#   scale_size_continuous(range = c(2,12)) + theme_custom + 
-#   ggtitle(paste("R-squared =", round(smallmam_meso_r2,2), "\nP =", signif(coef(summary(smallmam_meso))[2,4],2)))
-# 
-# 
-# # Meso preds, apex preds
-# data_meso_apex = camera_data[camera_data$Meso_predators > 0 | camera_data$Apex_predator > 0,]
-# meso_apex = glm(Meso_predators~Apex_predator, family="poisson", data=data_meso_apex); summary(meso_apex)
-# data_meso_apex2 <- aggregate(data_meso_apex$Apex_predator,by=list(x=data_meso_apex$Apex_predator,y=data_meso_apex$Meso_predators),length)
-# names(data_meso_apex2)[3] <- "count"
-# 
-# meso_apex_r2 = nagelkerke(meso_apex)$Pseudo.R.squared.for.model.vs.null[3]
-# ggplot(data=data_meso_apex2, aes(x=x, y=y)) +
-#   geom_point(aes(size=count)) + stat_smooth(method = "glm", se = FALSE, family="poisson", colour = "red") + 
-#   scale_size_continuous(range = c(2,12)) + theme_custom + 
-#   ggtitle(paste("R-squared =", round(meso_apex_r2,2), "\nP =", signif(coef(summary(meso_apex))[2,4],2)))
-# 
-# 
-# # Small mammals, apex pred
-# data_smallmam_apex = camera_data[camera_data$Small_mammals > 0 | camera_data$Apex_predator > 0,]
-# smallmam_apex = glm(Small_mammals~Apex_predator, family="poisson", data=data_smallmam_apex); summary(smallmam_apex)
-# data_smallmam_apex2 <- aggregate(data_smallmam_apex$Apex_predator,by=list(x=data_smallmam_apex$Apex_predator,y=data_smallmam_apex$Small_mammals),length)
-# names(data_smallmam_apex2)[3] <- "count"
-# 
-# smallmam_apex_r2 = nagelkerke(smallmam_apex)$Pseudo.R.squared.for.model.vs.null[3]
-# ggplot(data=data_smallmam_apex2, aes(x=x, y=y)) +
-#   geom_point(aes(size=count)) + stat_smooth(method = "glm", se = FALSE, family="poisson", colour = "red") + 
-#   scale_size_continuous(range = c(2,12)) + theme_custom + 
-#   ggtitle(paste("R-squared =", round(smallmam_apex_r2,2), "\nP =", signif(coef(summary(smallmam_apex))[2,4],2)))
-# 
-# 
-# # Large mammals, birds
-# data_largemam_bird = camera_data[camera_data$Large_mammals > 0 | camera_data$Birds > 0,]
-# largemam_bird = glm(Large_mammals~Birds, family="poisson", data=data_largemam_bird); summary(largemam_bird)
-# data_largemam_bird2 <- aggregate(data_largemam_bird$Birds,by=list(x=data_largemam_bird$Birds,y=data_largemam_bird$Large_mammals),length)
-# names(data_largemam_bird2)[3] <- "count"
-# 
-# largemam_bird_r2 = nagelkerke(largemam_bird)$Pseudo.R.squared.for.model.vs.null[3]
-# ggplot(data=data_largemam_bird2, aes(x=x, y=y)) +
-#   geom_point(aes(size=count)) + stat_smooth(method = "glm", se = FALSE, family="poisson", colour = "red") + 
-#   scale_size_continuous(range = c(2,12)) + theme_custom + 
-#   ggtitle(paste("R-squared =", round(largemam_bird_r2,2), "\nP =", signif(coef(summary(largemam_bird))[2,4],2)))
-
-
-# # Meso preds, apex preds
-# # data_meso_apex <- transform( camera_data, Meso_predators = sample(Meso_predators), Apex_predator = sample(Apex_predator) )
-# data_meso_apex = camera_data
-# 
-# meso_apex = glm(Meso_predators~Apex_predator, family="quasipoisson", data=data_meso_apex); summary(meso_apex)
-# data_meso_apex2 <- aggregate(data_meso_apex$Apex_predator,by=list(x=data_meso_apex$Apex_predator,y=data_meso_apex$Meso_predators),length)
-# names(data_meso_apex2)[3] <- "count"
-# 
-# meso_apex_r2 = nagelkerke(meso_apex)$Pseudo.R.squared.for.model.vs.null[3]
-# ggplot(data=data_meso_apex2, aes(x=x, y=y)) +
-#   geom_point(aes(size=count)) + stat_smooth(method = "glm", se = FALSE, family="poisson", colour = "red") + 
-#   scale_size_continuous(range = c(2,12)) + theme_custom + 
-#   ggtitle(paste("R-squared =", round(meso_apex_r2,2), "\nP =", signif(coef(summary(meso_apex))[2,4],2)))
+ggsave("results/output_summary.jpg", width = 7, height = 5)
